@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+    <head>
+<meta charset="utf8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>聊天室</title>
+
+<style>
+.back{background: black;width: 98%;height:28em;border-radius: 10px;margin: auto;margin-top:15px}
+.room{width:100%;height:100%;border-radius: 8px;background: white}
+.user{width: 100%;background:white;height:100%;border-radius: 8px;margin: auto;display:none;}
+button{        
+         width: 20%;   
+         
+        background-color: #4a77d4;   
+        border: 1px solid #3762bc;   
+        color: #fff;   
+      margin-left:9px;
+        border-radius: 5px;   
+		height:4em;
+         }
+button:hover{
+background-color:white;
+color : black;
+
+text-shadow: 1px 1px 1px gray;
+}
+
+.inputC{width:65%;height:3em;margin-left:10px;}
+}
+.send{width:95%;height:28%;margin-top:10px;margin: auto;float:left;}
+.sent{width:95%;height:70%;margin: auto;margin-top:10px;overflow-y:auto; border-radius: 10px;}
+
+    .bubbleItem{  
+        width: 100%;  
+	min-height:60px;
+    }  
+    .bubble{  
+        max-width: 60%;  
+        position: relative;  
+        line-height: 30px;  
+        padding-left: 10px;  
+        padding-top: 3px;  
+        padding-bottom: 3px;  
+        border-radius: 7px;  
+        margin-top: 15px;  
+        padding-right: 10px;  
+        display: inline-block;  
+    }  
+    .leftBubble{  
+        position: relative;  
+        margin-left: 25px;  
+        border: 1px solid #00b6b6;  
+        background-color: #f8fdfc;  
+    }  
+    .leftBubble .bottomLevel{  
+        position: absolute;  
+        top: 10px;  
+        left: -10px;  
+        border-top: 10px solid #00b6b6;  
+        border-left: 10px solid transparent;  
+    }  
+    .leftBubble .topLevel{  
+        position: absolute;  
+        top: 11px;  
+        left: -8px;  
+        border-top: 10px solid #f8fdfc;  
+        border-left: 10px solid transparent;  
+        z-index: 100;  
+    }  
+    .rightBubble{  
+        position: relative;  
+        margin-right: 25px;  
+        border: 1px solid #aaa;  
+    }  
+    .rightBubble .bottomLevel{  
+        position: absolute;  
+        top: 11px;  
+        right: -10px;  
+        border-top: 10px solid #aaa;  
+        border-right: 10px solid transparent;  
+    }  
+    .rightBubble .topLevel{  
+        position: absolute;  
+       top: 12px;  
+        right: -8px;  
+        border-top: 10px solid #fff;  
+        border-right: 10px solid transparent;  
+        z-index: 100;  
+    }  
+    .clearfix:after {  
+        visibility: hidden;  
+        display: block;  
+        font-size: 0;  
+        content: " ";  
+        clear: both;  
+        height: 0;  
+    }  
+    img{width: 50px;height: 50px ;border: 1px solid gray;float: left}
+    .lists{width:90%;height:55px;margin:auto;margin-top: 10px;background: #D9D9D9;border: 2px solid white;padding: 5px;border-radius: 5px}
+.inlet{width:90%;color:#3762bc;text-align: center}
+.leftt{width:90%;color:#999999;text-align: center}
+.messageHeadLeft{width:90%;color:yellowgreen}
+.messageHeadRight{width:90%;color:yellowgreen;text-align: right};
+</style>
+    <script src="http://code.jquery.com/jquery-latest.js"></script><!--引用jQuery-->
+    </head>
+    <body style="background:black">
+
+   <div class ="back">
+    <div class="room" id="room" >
+	<div style="width:100%"><img src='http://120.25.247.220:8080/my_evolution/picture0/article23/0.png' style="float:right;border-style:none;padding:2px;border-radius:5px"  onclick="change1()"/></div>
+      <div class=sent id=sent></div>
+	
+          <div class=send >
+        <input class = "inputC" id="inputC" ></input>
+		<button onclick="sen()">发送</button>	
+	
+        </div>
+      
+    </div>
+      <div class="user" id="user">
+	  	<div style="width:100%;min-height:60px"><img src='http://120.25.247.220:8080/my_evolution/picture0/article23/2.png'   style="float:right;border-style:none;padding:2px"  onclick="change2()"/></div>
+	 <div id='user1' style="width:100%;"></div>
+	 </div>
+    </div>
+
+    <script>
+	function change1(){$("#room").css('display','none');$("#user").css('display','block');}
+	function change2(){$("#user").css('display','none');$("#room").css('display','block');}
+     var webCon = new WebSocket("ws://www.wlsdzyzl.top:3000/");
+    var ava = '{{avatar}}';
+	var name='{{name}}';
+
+    webCon.onclose = function(e){alert("连接已丢失！可能你已在别地登录，或者闲置太久浏览器自动断开连接！");};
+    webCon.onmessage = function(msg){
+        
+        var content = JSON.parse(msg.data);
+        
+        var date = new Date();
+        var time = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+              if(content.type === "left")
+        {
+            $("#sent").append("<div class=leftt>"+content.username+"离开了聊天室 "+time+"</div>");
+          
+        }
+        else if(content.type === "inlet")
+        {
+            $("#sent").append("<div class=inlet>"+content.username+"进入了聊天室 "+time+"</div>");
+          
+        }
+        else if(content.type === "message")          
+        {
+            $("#sent").append("<div class='messageHeadLeft'>"+content.username+" "+ time+"</div>");
+  $("#sent").append("<div class='bubbleItem'><img src='"+content.avatar+"'/><span class=\"bubble leftBubble\"> "+content.content+"<span class=\"bottomLevel\"></span>  <span class=\"topLevel\"></span></span>  </div>");
+        }
+		else if(content.type === "sendInf")
+		{
+		webCon.send(JSON.stringify({name:name,avatar:ava}));
+		}
+        else
+        {
+            var user = $("#user1");
+            user.html("");
+            //alert(content.size);
+            for(var i in content)
+            {
+              //  alert(i);
+        
+            user.append("<div class=lists><img src='"+content[i]+"'/><div class=username>●"+i+"</div></div>");
+            }
+        }
+				$("#sent").scrollTop($("#sent")[0].scrollHeight);
+    }
+                function sen(){
+        let content = $("#inputC").val();
+        if(content!==""){
+            let date = new Date();
+       let time = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+    $("#sent").append("<div class='messageHeadRight'>me "+time+"</div>");
+    $("#sent").append(" <div class='bubbleItem' style=\"text-align:right\" ><img src='"+ava+"' style='float:right'/><span class=\"bubble rightBubble\"> "+content+"<span class=\"bottomLevel\"></span><span class=\"topLevel\"></span></span></div> ");
+        webCon.send(content); 
+              }
+        $("#inputC").val("");
+		$("#sent").scrollTop($("#sent")[0].scrollHeight);
+	            }
+     function send(e)
+     {
+        if(e.keyCode===13)
+        {
+            sen();
+        }
+		$("#roll").click();
+     }
+     $("#inputC").keydown(send);
+     $("#inputC").keyup(function(e){if(e.keyCode===13)$("#inputC").val("");});
+    </script>
+    </body>
+</html>
